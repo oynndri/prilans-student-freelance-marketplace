@@ -8,17 +8,17 @@
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 bg-neutral-200 border border-neutral-300">
           <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-            alt="Akmal Nasrulloh"
+            :src="user.avatar"
+            :alt="user.fullName"
             class="w-full h-full object-cover"
           />
         </div>
         <div class="min-w-0 flex-1">
           <div class="text-[13px] font-semibold text-neutral-900 leading-tight truncate">
-            Akmal Nasrulloh
+            {{ user.fullName }}
           </div>
           <div class="text-[11px] text-neutral-400 font-normal truncate leading-tight">
-            akmalnslrh@gmail.com
+            {{ user.email }}
           </div>
         </div>
       </div>
@@ -31,20 +31,35 @@
       class="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-neutral-200/80 py-1.5 z-50 text-[13px]"
     >
       <div class="px-3 py-1.5 border-b border-neutral-100">
-        <p class="font-medium text-neutral-800">Student Profile</p>
-        <p class="text-xs text-neutral-400">Computer Science • Level 3</p>
+        <p class="font-medium text-neutral-800">{{ user.fullName }}</p>
+        <p class="text-xs text-neutral-400 truncate">{{ user.department }}</p>
       </div>
-      <button class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2">
-        <span>Edit Profile</span>
-      </button>
-      <button class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2">
-        <span>Billing & Wallet</span>
-      </button>
-      <button class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2">
-        <span>Account Settings</span>
-      </button>
+
+      <router-link
+        to="/profile"
+        @click="isOpen = false"
+        class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2"
+      >
+        <User class="w-3.5 h-3.5 text-neutral-400" />
+        <span>Student Skill Profile</span>
+      </router-link>
+
+      <router-link
+        to="/profile-setup"
+        @click="isOpen = false"
+        class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2"
+      >
+        <Sparkles class="w-3.5 h-3.5 text-neutral-400" />
+        <span>Profile Setup Wizard</span>
+      </router-link>
+
       <div class="my-1 border-t border-neutral-100"></div>
-      <button class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-50 flex items-center gap-2">
+
+      <button
+        @click="handleLogout"
+        class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer"
+      >
+        <LogOut class="w-3.5 h-3.5 text-red-500" />
         <span>Sign Out</span>
       </button>
     </div>
@@ -52,11 +67,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ChevronDown, User, Sparkles, LogOut } from 'lucide-vue-next'
+import { authState, logoutUser } from '../data/auth'
 
+const router = useRouter()
 const isOpen = ref(false)
 const dropdownRef = ref(null)
+
+const user = computed(() => authState.currentUser)
+
+const handleLogout = () => {
+  logoutUser()
+  isOpen.value = false
+  router.push('/login')
+}
 
 const handleClickOutside = (e) => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {

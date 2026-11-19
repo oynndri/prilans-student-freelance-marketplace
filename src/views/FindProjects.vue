@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-5">
+  <div class="space-y-6">
     <!-- Top Search Header Component -->
     <SearchHeader
       v-model:searchQuery="searchQuery"
@@ -9,25 +9,26 @@
     />
 
     <!-- Main Two-Column Content: Filter Panel (Left) & Project Results (Right) -->
-    <div class="flex flex-col lg:flex-row gap-5 items-start">
-      <!-- Left Filter Panel (approx 230-240px width on desktop) -->
-      <div class="w-full lg:w-[220px] shrink-0">
-        <!-- Mobile Filter Toggle Button -->
+    <div class="flex flex-col xl:flex-row gap-6 items-start">
+      <!-- Left Filter Panel (approx 240px width on desktop) -->
+      <div class="w-full xl:w-[240px] shrink-0">
+        <!-- Tablet & Mobile Filter Toggle Button -->
         <button
           type="button"
           @click="showMobileFilters = !showMobileFilters"
-          class="lg:hidden w-full mb-3 flex items-center justify-between px-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-[13px] font-semibold text-neutral-800"
+          class="xl:hidden w-full mb-3 flex items-center justify-between px-4 py-2.5 bg-white rounded-xl border border-neutral-200 text-[13px] font-semibold text-neutral-800 shadow-2xs hover:bg-neutral-50 transition cursor-pointer"
         >
           <span class="flex items-center gap-2">
-            <span>Filter Criteria</span>
-            <span v-if="activeFilterCount > 0" class="px-1.5 py-0.5 rounded-full bg-neutral-900 text-white text-[10px]">
+            <span>Filter Options</span>
+            <span v-if="activeFilterCount > 0" class="px-2 py-0.5 rounded-full bg-neutral-900 text-white text-[11px] font-bold">
               {{ activeFilterCount }}
             </span>
           </span>
-          <span>{{ showMobileFilters ? 'Hide' : 'Show' }}</span>
+          <span class="text-xs text-neutral-500 font-medium">{{ showMobileFilters ? 'Hide Filters ▲' : 'Show Filters ▼' }}</span>
         </button>
 
-        <div :class="['lg:block', showMobileFilters ? 'block' : 'hidden']">
+        <!-- Desktop Always-Visible Filter, Mobile/Tablet Collapsible -->
+        <div :class="['xl:block', showMobileFilters ? 'block' : 'hidden']">
           <FilterPanel
             :categories="mockCategories"
             v-model:selectedCategory="selectedCategory"
@@ -58,26 +59,26 @@
           <span class="text-neutral-400 font-medium">Applied:</span>
           <span
             v-if="selectedCategory !== 'All Categories'"
-            class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-neutral-200/80 text-neutral-800 rounded-full"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-neutral-200 text-neutral-800 rounded-full shadow-2xs"
           >
             {{ selectedCategory }}
-            <button @click="selectedCategory = 'All Categories'" class="hover:text-black">×</button>
+            <button @click="selectedCategory = 'All Categories'" class="hover:text-black font-bold cursor-pointer">×</button>
           </span>
           <span
             v-for="exp in nonDefaultExperience"
             :key="exp"
-            class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-neutral-200/80 text-neutral-800 rounded-full"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-neutral-200 text-neutral-800 rounded-full shadow-2xs"
           >
             {{ exp }}
-            <button @click="removeExp(exp)" class="hover:text-black">×</button>
+            <button @click="removeExp(exp)" class="hover:text-black font-bold cursor-pointer">×</button>
           </span>
           <span
             v-for="b in nonDefaultBudgets"
             :key="b"
-            class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-neutral-200/80 text-neutral-800 rounded-full"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-neutral-200 text-neutral-800 rounded-full shadow-2xs"
           >
             {{ getBudgetLabel(b) }}
-            <button @click="removeBudget(b)" class="hover:text-black">×</button>
+            <button @click="removeBudget(b)" class="hover:text-black font-bold cursor-pointer">×</button>
           </span>
           <button
             @click="resetAllFilters"
@@ -115,14 +116,13 @@ const locationQuery = ref('')
 const selectedCategory = ref('All Categories')
 const selectedExperience = ref(['any']) // 'any' is checked in screenshot
 const projectType = ref('Hourly') // 'Hourly' selected in segmented control
-const selectedBudgets = ref([]) // empty initially, or user selects
+const selectedBudgets = ref([]) // empty initially
 const selectedProposals = ref(['10to15']) // 10 to 15 is checked in reference screenshot!
 const sortBy = ref('newest')
 const viewMode = ref('grid')
 const showMobileFilters = ref(false)
 
 // Applied projects tracking
-// In the screenshot, card #3 ("Web Designer for E-Commerce Website") is "Applied"
 const appliedProjectIds = ref([3])
 
 const handleApply = (id) => {
@@ -193,7 +193,6 @@ const totalSimulatedCount = computed(() => {
   if (!searchQuery.value && selectedCategory.value === 'All Categories' && selectedExperience.value.includes('any')) {
     return base
   }
-  // scale proportional to matched sample items
   return Math.max(filteredAndSortedProjects.value.length * 245, filteredAndSortedProjects.value.length)
 })
 

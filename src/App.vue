@@ -1,84 +1,75 @@
 <template>
-  <div class="min-h-screen bg-[#eef1f5] text-[#0f172a] p-2 sm:p-4 md:p-6 lg:p-8 flex justify-center font-sans">
-    <!-- Simulated Browser Window Container matching reference frame -->
-    <div
-      class="w-full max-w-[1440px] bg-white rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-neutral-200/90 overflow-hidden flex flex-col"
-    >
-      <!-- Simulated Browser Top Chrome / Nav Bar (like the reference screenshot) -->
-      <header
-        class="bg-[#f8fafc] border-b border-[#e2e8f0] px-4 py-3 flex items-center justify-between text-neutral-500 text-xs select-none"
-      >
-        <!-- Window Traffic Lights (Red, Yellow, Green) -->
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1.5 mr-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#ef4444]"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span>
-            <span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span>
-          </div>
+  <div class="w-full min-h-screen h-[100dvh] flex flex-col bg-[#f1f4f9] text-[#0f172a] overflow-hidden antialiased font-sans">
+    <!-- Full-Screen Initial Branded Loading Screen -->
+    <AppLoadingScreen :is-loading="isLoading" />
 
-          <!-- Browser History & Tabs Controls -->
-          <div class="hidden sm:flex items-center gap-2 text-neutral-400">
-            <button class="hover:text-neutral-700 transition"><PanelLeft class="w-3.5 h-3.5" /></button>
-            <button class="hover:text-neutral-700 transition"><ChevronLeft class="w-3.5 h-3.5" /></button>
-            <button class="hover:text-neutral-700 transition"><ChevronRight class="w-3.5 h-3.5" /></button>
-          </div>
+    <!-- Top Navigation Bar for Mobile and Tablet (<1024px) -->
+    <header class="lg:hidden shrink-0 flex items-center justify-between px-4 py-3.5 bg-white border-b border-[#e2e8f0] shadow-xs z-30">
+      <router-link to="/" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-[#0f172a] text-white flex items-center justify-center font-black text-sm">
+          <span>P</span>
         </div>
+        <span class="text-lg font-extrabold tracking-tight text-neutral-900">
+          Prilans<span class="text-[#22c55e]">.</span>
+        </span>
+      </router-link>
 
-        <!-- Center Address Bar -->
-        <div class="flex-1 max-w-sm sm:max-w-md mx-3">
-          <div class="bg-white border border-neutral-200/90 rounded-lg px-3 py-1 flex items-center justify-center gap-2 text-[12px] text-neutral-600 shadow-2xs">
-            <ShieldCheck class="w-3.5 h-3.5 text-neutral-400" />
-            <span class="font-medium text-neutral-700">prilans.com</span>
-            <RotateCw class="w-3 h-3 text-neutral-400 ml-auto hidden sm:block" />
-          </div>
-        </div>
-
-        <!-- Right Browser Icons -->
-        <div class="flex items-center gap-3 text-neutral-400">
-          <button class="hover:text-neutral-700 transition"><Share2 class="w-3.5 h-3.5" /></button>
-          <button class="hover:text-neutral-700 transition"><Plus class="w-3.5 h-3.5" /></button>
-          <button class="hover:text-neutral-700 transition"><Copy class="w-3.5 h-3.5" /></button>
-        </div>
-      </header>
-
-      <!-- Mobile Top Navigation Bar (Shown on small screens to toggle sidebar) -->
-      <div class="lg:hidden flex items-center justify-between px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0]">
-        <div class="flex items-center gap-2 font-extrabold text-neutral-900 text-base">
-          <span>Prilans.</span>
-        </div>
+      <div class="flex items-center gap-2">
         <button
           @click="isMobileMenuOpen = !isMobileMenuOpen"
-          class="p-2 rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-100 transition"
+          class="p-2 rounded-xl bg-neutral-100 border border-neutral-200/80 text-neutral-700 hover:bg-neutral-200 transition cursor-pointer"
+          aria-label="Toggle navigation menu"
         >
           <Menu class="w-5 h-5" />
         </button>
       </div>
+    </header>
 
-      <!-- Main Application Layout Body -->
-      <div class="flex flex-1 relative min-h-[850px] bg-[#f8fafc]">
-        <!-- Desktop Sidebar -->
-        <div class="hidden lg:block shrink-0">
-          <AppSidebar
-            :active-nav="activeNav"
-            @select-nav="handleNavSelect"
-            @upgrade="showUpgradeModal = true"
-          />
-        </div>
+    <!-- Main Application Shell -->
+    <div class="flex flex-1 min-h-0 w-full overflow-hidden">
+      <!-- Desktop Fixed/Sticky Sidebar (lg:block, width 260px) - Hidden on auth pages -->
+      <div v-if="!isAuthPage" class="hidden lg:block shrink-0 h-full">
+        <AppSidebar
+          :active-nav="activeNav"
+          @select-nav="handleNavSelect"
+          @upgrade="showUpgradeModal = true"
+        />
+      </div>
 
-        <!-- Mobile Drawer Sidebar -->
+      <!-- Mobile/Tablet Drawer Navigation with Backdrop -->
+      <Teleport to="body">
         <div
-          v-if="isMobileMenuOpen"
+          v-if="isMobileMenuOpen && !isAuthPage"
           class="fixed inset-0 z-50 lg:hidden flex"
+          role="dialog"
+          aria-modal="true"
         >
-          <!-- Backdrop -->
-          <div class="fixed inset-0 bg-black/40 backdrop-blur-xs" @click="isMobileMenuOpen = false"></div>
-          <!-- Drawer Content -->
-          <div class="relative w-[260px] bg-[#f8fafc] h-full shadow-2xl flex flex-col z-10">
-            <div class="flex justify-end p-2">
-              <button @click="isMobileMenuOpen = false" class="p-1 rounded-lg text-neutral-500 hover:text-black">
+          <!-- Backdrop overlay -->
+          <div
+            class="fixed inset-0 bg-black/50 backdrop-blur-2xs transition-opacity"
+            @click="isMobileMenuOpen = false"
+          ></div>
+
+          <!-- Slide-out Drawer Panel -->
+          <div class="relative w-[280px] max-w-[85vw] bg-[#f8fafc] h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
+            <!-- Header of drawer -->
+            <div class="flex items-center justify-between p-4 border-b border-neutral-200/70">
+              <router-link to="/" @click="isMobileMenuOpen = false" class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-[#0f172a] text-white flex items-center justify-center font-bold text-xs">
+                  <span>P</span>
+                </div>
+                <span class="font-extrabold text-neutral-900 text-base">Prilans<span class="text-[#22c55e]">.</span></span>
+              </router-link>
+              <button
+                @click="isMobileMenuOpen = false"
+                class="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 hover:bg-neutral-200/60 transition cursor-pointer"
+                aria-label="Close navigation menu"
+              >
                 <X class="w-5 h-5" />
               </button>
             </div>
+
+            <!-- Drawer body -->
             <div class="flex-1 overflow-y-auto">
               <AppSidebar
                 :active-nav="activeNav"
@@ -88,94 +79,105 @@
             </div>
           </div>
         </div>
+      </Teleport>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-7 min-w-0 overflow-y-auto">
-          <!-- Primary Find Projects View -->
-          <FindProjects v-if="activeNav === 'find-project'" />
-
-          <!-- Placeholder Views for Secondary Navigation items -->
-          <div v-else class="bg-white rounded-2xl p-8 border border-neutral-200/90 shadow-sm text-center py-20">
-            <div class="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-3 text-neutral-600">
-              <Component :is="currentNavIcon" class="w-6 h-6 stroke-[1.8]" />
+      <!-- Main Content Area: Fills remaining viewport, scrolls vertically independently -->
+      <main
+        class="flex-1 min-w-0 h-full overflow-y-auto"
+        :class="isAuthPage ? 'p-0' : 'bg-[#f1f4f9] p-4 sm:p-6 md:p-8 xl:p-10'"
+      >
+        <div :class="isAuthPage ? 'w-full' : 'max-w-[1600px] mx-auto w-full'">
+          <!-- Secondary Nav Placeholders when on home route but non-find-project active -->
+          <div
+            v-if="!isAuthPage && route.path === '/' && activeNav !== 'find-project'"
+            class="bg-white rounded-2xl p-8 sm:p-12 border border-neutral-200/90 shadow-xs text-center py-20 max-w-2xl mx-auto my-8"
+          >
+            <div class="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-4 text-neutral-700">
+              <Component :is="currentNavIcon" class="w-7 h-7 stroke-[1.8]" />
             </div>
-            <h2 class="text-xl font-bold text-neutral-900 capitalize mb-1">
+            <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 capitalize mb-2">
               {{ currentNavTitle }}
             </h2>
-            <p class="text-sm text-neutral-500 max-w-md mx-auto mb-5">
-              This section is configured for student freelancers and clients. Switch back to Find Project to view live marketplace postings.
+            <p class="text-sm text-neutral-500 leading-relaxed max-w-md mx-auto mb-6">
+              This section is configured for student freelancers and clients. Switch back to Find Projects to browse opportunities.
             </p>
             <button
               @click="activeNav = 'find-project'"
-              class="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition cursor-pointer"
+              class="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition cursor-pointer shadow-xs active:scale-[0.98]"
             >
-              Back to Find Project
+              Back to Find Projects
             </button>
           </div>
-        </main>
-      </div>
+
+          <!-- Dynamic Route View -->
+          <router-view v-else />
+        </div>
+      </main>
     </div>
 
     <!-- Upgrade Modal (when clicking Plus Plan Upgrade Now) -->
-    <div
-      v-if="showUpgradeModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
-    >
-      <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-neutral-200">
-        <div class="flex justify-between items-start mb-4">
-          <div class="flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl bg-[#22c55e] flex items-center justify-center text-white">
-              <Rocket class="w-4 h-4 fill-white" />
-            </span>
-            <h3 class="text-lg font-bold text-neutral-900">Upgrade to Plus Plan</h3>
+    <Teleport to="body">
+      <div
+        v-if="showUpgradeModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="bg-white rounded-2xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-neutral-200 animate-in fade-in zoom-in-95 duration-150">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <span class="w-9 h-9 rounded-xl bg-[#22c55e] flex items-center justify-center text-white shadow-xs">
+                <Rocket class="w-4 h-4 fill-white" />
+              </span>
+              <div>
+                <h3 class="text-lg font-bold text-neutral-900">Upgrade to Plus Plan</h3>
+                <p class="text-[11px] text-neutral-400">Exclusive student freelance advantages</p>
+              </div>
+            </div>
+            <button @click="showUpgradeModal = false" class="text-neutral-400 hover:text-black p-1">
+              <X class="w-5 h-5" />
+            </button>
           </div>
-          <button @click="showUpgradeModal = false" class="text-neutral-400 hover:text-black">
-            <X class="w-5 h-5" />
-          </button>
-        </div>
-        <p class="text-xs text-neutral-500 mb-4 leading-relaxed">
-          Gain student-first superpowers: view competitor proposal prices, send 50 free monthly proposals, and enjoy guaranteed escrow payouts.
-        </p>
-        <div class="p-3 bg-neutral-50 rounded-xl border border-neutral-200/80 mb-5">
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-semibold text-neutral-900">Student Plus Monthly</span>
-            <span class="font-extrabold text-neutral-900 text-sm">$9.99/mo</span>
+          <p class="text-xs text-neutral-500 mb-4 leading-relaxed">
+            Gain student-first superpowers: view competitor proposal prices, send 50 free monthly proposals, and enjoy guaranteed escrow payouts.
+          </p>
+          <div class="p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/80 mb-5">
+            <div class="flex justify-between items-center text-xs">
+              <div>
+                <span class="font-semibold text-neutral-900 block">Student Plus Monthly</span>
+                <span class="text-[11px] text-neutral-400">Billed monthly, cancel anytime</span>
+              </div>
+              <span class="font-extrabold text-neutral-900 text-base">$9.99<span class="text-xs font-normal text-neutral-500">/mo</span></span>
+            </div>
           </div>
-        </div>
-        <div class="flex gap-2">
-          <button
-            @click="showUpgradeModal = false"
-            class="flex-1 py-2.5 rounded-xl bg-neutral-100 text-neutral-700 text-xs font-semibold hover:bg-neutral-200 transition"
-          >
-            Cancel
-          </button>
-          <button
-            @click="showUpgradeModal = false"
-            class="flex-1 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition"
-          >
-            Confirm Upgrade
-          </button>
+          <div class="flex gap-2.5">
+            <button
+              @click="showUpgradeModal = false"
+              class="flex-1 py-2.5 rounded-xl bg-neutral-100 text-neutral-700 text-xs font-semibold hover:bg-neutral-200 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              @click="showUpgradeModal = false"
+              class="flex-1 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition cursor-pointer shadow-xs active:scale-[0.98]"
+            >
+              Confirm Upgrade
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import {
-  PanelLeft,
-  ChevronLeft,
-  ChevronRight,
-  ShieldCheck,
-  RotateCw,
-  Share2,
-  Plus,
-  Copy,
   Menu,
   X,
   Search,
-  Users,
+  UserCheck,
   Building2,
   FileText,
   Mail,
@@ -184,12 +186,24 @@ import {
   HelpCircle,
   Rocket
 } from 'lucide-vue-next'
+import AppLoadingScreen from './components/AppLoadingScreen.vue'
 import AppSidebar from './components/AppSidebar.vue'
-import FindProjects from './views/FindProjects.vue'
 
+const route = useRoute()
+const isLoading = ref(true)
 const activeNav = ref('find-project')
 const isMobileMenuOpen = ref(false)
 const showUpgradeModal = ref(false)
+
+const isAuthPage = computed(() => {
+  return ['/register', '/login'].includes(route.path)
+})
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false
+  }, 900)
+})
 
 const handleNavSelect = (id) => {
   activeNav.value = id
@@ -198,7 +212,7 @@ const handleNavSelect = (id) => {
 
 const navMeta = {
   'find-project': { title: 'Find Project', icon: Search },
-  'find-freelancers': { title: 'Find Freelancers', icon: Users },
+  'student-profile': { title: 'My Skill Profile', icon: UserCheck },
   'companies': { title: 'Companies', icon: Building2 },
   'my-proposal': { title: 'My Proposal', icon: FileText },
   'message': { title: 'Message', icon: Mail },
