@@ -221,17 +221,6 @@
             </router-link>
           </div>
         </div>
-
-        <!-- Hiring Student Freelancers Tip Card -->
-        <div class="bg-gradient-to-br from-[#0f172a] to-neutral-900 text-white rounded-2xl p-5 shadow-xs space-y-2">
-          <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/10 text-emerald-400">
-            Pro Hiring Tip
-          </span>
-          <h4 class="text-xs font-bold">Fast-Track University Talent</h4>
-          <p class="text-[11px] text-neutral-300 leading-relaxed">
-            University students excel with clearly defined requirements, responsive design scopes, and modern tech stacks (Vue 3, Tailwind, Python).
-          </p>
-        </div>
       </div>
     </div>
   </div>
