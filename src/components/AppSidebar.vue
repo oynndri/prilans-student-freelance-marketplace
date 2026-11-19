@@ -9,9 +9,14 @@
         <div class="w-8 h-8 rounded-xl bg-[#0f172a] text-white flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
           <span>P</span>
         </div>
-        <span class="text-[19px] font-extrabold tracking-tight text-neutral-900">
-          Prilans<span class="text-[#22c55e]">.</span>
-        </span>
+        <div>
+          <span class="text-[19px] font-extrabold tracking-tight text-neutral-900 block leading-tight">
+            Prilans<span class="text-[#22c55e]">.</span>
+          </span>
+          <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block">
+            {{ isClient ? 'Client Portal' : 'Student Portal' }}
+          </span>
+        </div>
       </router-link>
 
       <!-- User Profile Dropdown -->
@@ -26,7 +31,7 @@
         </div>
         <nav class="space-y-1" aria-label="Main Menu">
           <button
-            v-for="item in menuItems"
+            v-for="item in activeMenuItems"
             :key="item.id"
             @click="navigateItem(item)"
             type="button"
@@ -94,10 +99,15 @@ import {
   Mail,
   Bell,
   Settings,
-  HelpCircle
+  HelpCircle,
+  LayoutDashboard,
+  PlusCircle,
+  Briefcase,
+  Users
 } from 'lucide-vue-next'
 import UserProfileDropdown from './UserProfileDropdown.vue'
 import PlusPlanCard from './PlusPlanCard.vue'
+import { isClient } from '../data/auth'
 
 const props = defineProps({
   activeNav: {
@@ -110,7 +120,8 @@ const emit = defineEmits(['select-nav', 'upgrade'])
 const router = useRouter()
 const route = useRoute()
 
-const menuItems = [
+// Student specific navigation
+const studentMenuItems = [
   { id: 'find-project', label: 'Find Project', icon: Search, route: '/' },
   { id: 'student-profile', label: 'My Skill Profile', icon: UserCheck, route: '/profile' },
   { id: 'companies', label: 'Companies', icon: Building2 },
@@ -119,6 +130,20 @@ const menuItems = [
   { id: 'notification', label: 'Notification', icon: Bell }
 ]
 
+// Client specific navigation
+const clientMenuItems = [
+  { id: 'client-dashboard', label: 'Dashboard', icon: LayoutDashboard, route: '/client/dashboard' },
+  { id: 'post-project', label: 'Post a Project', icon: PlusCircle, route: '/client/projects/new' },
+  { id: 'my-projects', label: 'My Projects', icon: Briefcase, route: '/client/projects' },
+  { id: 'find-freelancers', label: 'Find Freelancers', icon: Users, route: '/' },
+  { id: 'message', label: 'Message', icon: Mail },
+  { id: 'notification', label: 'Notification', icon: Bell }
+]
+
+const activeMenuItems = computed(() => {
+  return isClient.value ? clientMenuItems : studentMenuItems
+})
+
 const preferenceItems = [
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'help', label: 'Help', icon: HelpCircle }
@@ -126,8 +151,8 @@ const preferenceItems = [
 
 const isItemActive = (item) => {
   if (item.route && route.path === item.route) return true
-  if (route.path === '/' && item.id === 'find-project') return true
-  if (route.path === '/profile' && item.id === 'student-profile') return true
+  if (route.path === '/' && item.id === 'find-project' && !isClient.value) return true
+  if (route.path.startsWith('/client/projects') && item.id === 'my-projects') return true
   return props.activeNav === item.id
 }
 

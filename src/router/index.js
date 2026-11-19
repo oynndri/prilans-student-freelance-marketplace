@@ -5,7 +5,16 @@ import LoginView from '../views/LoginView.vue'
 import ProfileSetupView from '../views/ProfileSetupView.vue'
 import StudentProfileView from '../views/StudentProfileView.vue'
 
+// Client Views
+import ClientRegisterView from '../views/client/ClientRegisterView.vue'
+import ClientLoginView from '../views/client/ClientLoginView.vue'
+import ClientDashboardView from '../views/client/ClientDashboardView.vue'
+import PostProjectView from '../views/client/PostProjectView.vue'
+import ManageProjectsView from '../views/client/ManageProjectsView.vue'
+import ProjectDetailsView from '../views/client/ProjectDetailsView.vue'
+
 const routes = [
+  // Student & Public Marketplace Routes
   {
     path: '/',
     name: 'FindProjects',
@@ -30,6 +39,43 @@ const routes = [
     path: '/profile',
     name: 'StudentProfile',
     component: StudentProfileView
+  },
+
+  // Client Portal Routes
+  {
+    path: '/client/register',
+    name: 'ClientRegister',
+    component: ClientRegisterView
+  },
+  {
+    path: '/client/login',
+    name: 'ClientLogin',
+    component: ClientLoginView
+  },
+  {
+    path: '/client/dashboard',
+    name: 'ClientDashboard',
+    component: ClientDashboardView
+  },
+  {
+    path: '/client/projects/new',
+    name: 'PostProject',
+    component: PostProjectView
+  },
+  {
+    path: '/client/projects/:id/edit',
+    name: 'EditProject',
+    component: PostProjectView
+  },
+  {
+    path: '/client/projects',
+    name: 'ManageProjects',
+    component: ManageProjectsView
+  },
+  {
+    path: '/client/projects/:id',
+    name: 'ProjectDetails',
+    component: ProjectDetailsView
   }
 ]
 
