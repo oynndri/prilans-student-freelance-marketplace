@@ -6,6 +6,30 @@ const NOTIFICATIONS_KEY = 'prilans_notifications'
 // Initial seed mock applications to demonstrate the dashboard immediately
 const defaultApplications = [
   {
+    id: 'app-seed-comp-1',
+    projectId: 2,
+    projectTitle: 'Looking for Help to Build an iOS and Android App',
+    projectCategory: 'Mobile Development',
+    projectPriceDisplay: '$32.00 /hour',
+    studentId: 'student-akmal',
+    studentName: 'Akmal Nasrulloh',
+    studentEmail: 'akmalnslrh@gmail.com',
+    studentUniversity: 'University of Dhaka',
+    studentDepartment: 'Computer Science & Engineering',
+    studentAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
+    studentSkills: ['Vue', 'JavaScript', 'Tailwind CSS', 'Mobile Development'],
+    studentExperienceLevel: 'Intermediate',
+    clientId: 'client-techcorp',
+    proposal: 'Completed the hybrid mobile wrapper components and responsive dashboard screens successfully.',
+    proposedBudget: '$32.00 /hour',
+    estimatedDuration: '3 weeks',
+    additionalInfo: 'Delivered all deliverables on GitHub.',
+    status: 'Accepted',
+    workStatus: 'Completed', // 'In Progress', 'Completed'
+    appliedAt: new Date(Date.now() - 3600000 * 24 * 7).toISOString(),
+    updatedAt: new Date(Date.now() - 3600000 * 24 * 3).toISOString()
+  },
+  {
     id: 'app-seed-1',
     projectId: 3, // Web Designer for E-Commerce Website (pre-applied in reference screenshot)
     projectTitle: 'Web Designer for E-Commerce Website',
@@ -24,7 +48,8 @@ const defaultApplications = [
     proposedBudget: '$25.00 /hour',
     estimatedDuration: '2 weeks',
     additionalInfo: 'Available 20 hours per week. Can start immediately.',
-    status: 'Pending', // 'Pending', 'Accepted', 'Rejected'
+    status: 'Accepted', // Let's make this accepted & in progress so client can test marking as Completed
+    workStatus: 'In Progress',
     appliedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
     updatedAt: new Date(Date.now() - 3600000 * 5).toISOString()
   },
@@ -48,6 +73,7 @@ const defaultApplications = [
     estimatedDuration: '10 days',
     additionalInfo: '',
     status: 'Pending',
+    workStatus: null,
     appliedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
     updatedAt: new Date(Date.now() - 3600000 * 12).toISOString()
   }
@@ -196,6 +222,13 @@ export function updateApplicationStatus(applicationId, newStatus, clientNote = '
   app.updatedAt = new Date().toISOString()
   if (clientNote) app.clientNote = clientNote
 
+  // When accepted, initiate workStatus as 'In Progress'
+  if (newStatus === 'Accepted' && !app.workStatus) {
+    app.workStatus = 'In Progress'
+  } else if (newStatus !== 'Accepted') {
+    app.workStatus = null
+  }
+
   persistApplications()
 
   // Notification for the student
@@ -204,7 +237,7 @@ export function updateApplicationStatus(applicationId, newStatus, clientNote = '
     : 'Application Status Update'
 
   const message = newStatus === 'Accepted'
-    ? `Your application for "${app.projectTitle}" has been accepted! The client will reach out to discuss milestones.`
+    ? `Your application for "${app.projectTitle}" has been accepted! The engagement is now In Progress.`
     : `Your application for "${app.projectTitle}" was not selected. We encourage you to apply for other matching gigs.`
 
   createNotification({
@@ -213,6 +246,32 @@ export function updateApplicationStatus(applicationId, newStatus, clientNote = '
     message,
     type: newStatus.toLowerCase()
   })
+
+  return { success: true, application: app }
+}
+
+// Client action: Update Work Completion Status ('In Progress' -> 'Completed')
+export function updateWorkStatus(applicationId, workStatus) {
+  const app = applicationState.applications.find(a => a.id === applicationId)
+  if (!app) return { success: false, message: 'Application not found.' }
+
+  if (app.status !== 'Accepted') {
+    return { success: false, message: 'Work completion status can only be updated for Accepted applications.' }
+  }
+
+  app.workStatus = workStatus // 'In Progress' | 'Completed'
+  app.updatedAt = new Date().toISOString()
+  persistApplications()
+
+  if (workStatus === 'Completed') {
+    // Notify student that project has been marked completed and reviews are open
+    createNotification({
+      userId: app.studentId,
+      title: 'Project Completed! Review Available',
+      message: `Your project "${app.projectTitle}" has been marked Completed by the client. You can now leave a review for your experience!`,
+      type: 'completed'
+    })
+  }
 
   return { success: true, application: app }
 }

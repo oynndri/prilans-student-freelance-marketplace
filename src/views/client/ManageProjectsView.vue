@@ -99,6 +99,16 @@
 
           <!-- Actions toolbar -->
           <div class="flex flex-wrap items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-neutral-100">
+            <!-- Find Matching Students (Phase 06 Bonus) -->
+            <router-link
+              :to="`/client/projects/${project.id}/recommended-students`"
+              class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 text-xs font-bold transition flex items-center gap-1 border border-indigo-200"
+              title="Find students matching required skills"
+            >
+              <Sparkles class="w-3.5 h-3.5 text-indigo-600" />
+              <span>Matching Students</span>
+            </router-link>
+
             <!-- View Applicants Button -->
             <router-link
               :to="`/client/projects/${project.id}/applicants`"
@@ -218,7 +228,8 @@ import {
   Trash2,
   AlertTriangle,
   FolderSearch,
-  Users
+  Users,
+  Sparkles
 } from 'lucide-vue-next'
 import { authState } from '../../data/auth'
 import {

@@ -192,6 +192,36 @@
           </div>
         </div>
 
+        <!-- Client Rating & Reputation Card -->
+        <div class="bg-white rounded-2xl p-5 border border-neutral-200/90 shadow-2xs space-y-3">
+          <div class="flex items-center justify-between border-b border-neutral-100 pb-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500">Company Reputation</h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              Student Reviews
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <span class="text-2xl font-black text-neutral-900 block leading-tight">
+                {{ clientRatingStats.formattedRating }}
+              </span>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <StarRating :model-value="clientRatingStats.averageRating" :readonly="true" size="sm" />
+                <span class="text-[11px] text-neutral-400 font-medium">
+                  ({{ clientRatingStats.totalReviews }})
+                </span>
+              </div>
+            </div>
+            <router-link
+              to="/client/reviews"
+              class="text-xs font-semibold text-blue-600 hover:underline"
+            >
+              View Feedbacks →
+            </router-link>
+          </div>
+        </div>
+
         <!-- Hiring Student Freelancers Tip Card -->
         <div class="bg-gradient-to-br from-[#0f172a] to-neutral-900 text-white rounded-2xl p-5 shadow-xs space-y-2">
           <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/10 text-emerald-400">
@@ -222,8 +252,18 @@ import {
 } from 'lucide-vue-next'
 import { authState } from '../../data/auth'
 import { projectState } from '../../data/projectService'
+import { getReviewsForClient, calculateRatingMetrics } from '../../data/reviewService'
+import StarRating from '../../components/StarRating.vue'
 
 const client = computed(() => authState.currentUser)
+
+const clientReviews = computed(() => {
+  return getReviewsForClient(client.value?.id || 'client-techcorp')
+})
+
+const clientRatingStats = computed(() => {
+  return calculateRatingMetrics(clientReviews.value)
+})
 
 const clientProjects = computed(() => {
   return projectState.projects.filter(p => p.clientId === client.value.id || !p.clientId)

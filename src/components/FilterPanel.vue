@@ -82,7 +82,15 @@
 
     <!-- 3. Project Type (Segmented control matching reference) -->
     <FilterSection title="Project Type">
-      <div class="grid grid-cols-2 p-1 bg-neutral-100/90 rounded-xl border border-neutral-200/60 text-[12px] font-medium">
+      <div class="grid grid-cols-3 p-1 bg-neutral-100/90 rounded-xl border border-neutral-200/60 text-[11px] font-medium">
+        <button
+          type="button"
+          @click="$emit('update:projectType', 'All')"
+          class="py-1.5 rounded-lg text-center transition cursor-pointer"
+          :class="projectType === 'All' ? 'bg-white text-neutral-900 font-semibold shadow-xs' : 'text-neutral-500 hover:text-neutral-800'"
+        >
+          All
+        </button>
         <button
           type="button"
           @click="$emit('update:projectType', 'Hourly')"
@@ -97,7 +105,7 @@
           class="py-1.5 rounded-lg text-center transition cursor-pointer"
           :class="projectType === 'Fixed Price' ? 'bg-white text-neutral-900 font-semibold shadow-xs' : 'text-neutral-500 hover:text-neutral-800'"
         >
-          Fixed Price
+          Fixed
         </button>
       </div>
     </FilterSection>
@@ -182,11 +190,11 @@ const props = defineProps({
   },
   selectedExperience: {
     type: Array,
-    default: () => ['any']
+    default: () => []
   },
   projectType: {
     type: String,
-    default: 'Hourly'
+    default: 'All'
   },
   budgetRanges: {
     type: Array,
@@ -198,11 +206,11 @@ const props = defineProps({
   },
   proposalRanges: {
     type: Array,
-    default: () => ['10to15']
+    default: () => []
   },
   selectedProposals: {
     type: Array,
-    default: () => ['10to15']
+    default: () => []
   }
 })
 

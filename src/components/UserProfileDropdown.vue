@@ -52,7 +52,16 @@
           class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2"
         >
           <User class="w-3.5 h-3.5 text-neutral-400" />
-          <span>Student Skill Profile</span>
+          <span>My Skill Profile</span>
+        </router-link>
+
+        <router-link
+          to="/my-applications"
+          @click="isOpen = false"
+          class="w-full text-left px-3 py-1.5 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 flex items-center gap-2"
+        >
+          <FileText class="w-3.5 h-3.5 text-neutral-400" />
+          <span>My Applications</span>
         </router-link>
 
         <router-link
@@ -94,25 +103,11 @@
         </router-link>
       </template>
 
-      <!-- Fast Role Switcher in Demo Dropdown -->
-      <div class="my-1 border-t border-neutral-100"></div>
-      <div class="px-3 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-        Demo Role Switcher
-      </div>
-      <button
-        type="button"
-        @click="handleSwitchRole(isClient ? 'student' : 'client')"
-        class="w-full text-left px-3 py-1.5 text-neutral-700 hover:bg-neutral-50 flex items-center gap-2 cursor-pointer font-medium"
-      >
-        <ArrowLeftRight class="w-3.5 h-3.5 text-neutral-500" />
-        <span>Switch to {{ isClient ? 'Student View' : 'Client View' }}</span>
-      </button>
-
       <div class="my-1 border-t border-neutral-100"></div>
 
       <button
         @click="handleLogout"
-        class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer"
+        class="w-full text-left px-3 py-1.5 text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer font-medium"
       >
         <LogOut class="w-3.5 h-3.5 text-red-500" />
         <span>Sign Out</span>
@@ -132,9 +127,9 @@ import {
   LayoutDashboard,
   Briefcase,
   PlusCircle,
-  ArrowLeftRight
+  FileText
 } from 'lucide-vue-next'
-import { authState, isClient, logoutUser, switchRole } from '../data/auth'
+import { authState, isClient, logoutUser } from '../data/auth'
 
 const router = useRouter()
 const isOpen = ref(false)
@@ -142,25 +137,10 @@ const dropdownRef = ref(null)
 
 const user = computed(() => authState.currentUser)
 
-const handleSwitchRole = (newRole) => {
-  switchRole(newRole)
-  isOpen.value = false
-  if (newRole === 'client') {
-    router.push('/client/dashboard')
-  } else {
-    router.push('/')
-  }
-}
-
 const handleLogout = () => {
-  const wasClient = isClient.value
   logoutUser()
   isOpen.value = false
-  if (wasClient) {
-    router.push('/client/login')
-  } else {
-    router.push('/login')
-  }
+  router.push('/login')
 }
 
 const handleClickOutside = (e) => {

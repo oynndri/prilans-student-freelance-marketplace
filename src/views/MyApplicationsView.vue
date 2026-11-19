@@ -110,6 +110,13 @@
               >
                 {{ app.status }}
               </span>
+              <span
+                v-if="app.status === 'Accepted'"
+                class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                :class="app.workStatus === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-blue-50 text-blue-700 border border-blue-200'"
+              >
+                Work: {{ app.workStatus || 'In Progress' }}
+              </span>
               <span class="text-[11px] text-neutral-400 font-normal">
                 {{ app.projectCategory }}
               </span>
@@ -129,7 +136,26 @@
           </div>
 
           <!-- Right actions -->
-          <div class="flex items-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-neutral-100">
+          <div class="flex flex-wrap items-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-neutral-100">
+            <!-- Review Client button for completed engagements -->
+            <template v-if="app.status === 'Accepted' && app.workStatus === 'Completed'">
+              <button
+                v-if="!hasReviewedApp(app.id)"
+                @click="openReviewModal(app)"
+                class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+              >
+                <Star class="w-3.5 h-3.5 fill-white" />
+                <span>Review Your Experience</span>
+              </button>
+              <span
+                v-else
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-semibold"
+              >
+                <Check class="w-3.5 h-3.5 text-emerald-600" />
+                <span>Reviewed</span>
+              </span>
+            </template>
+
             <button
               @click="openDetails(app)"
               class="px-3.5 py-1.5 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
@@ -257,6 +283,13 @@
         </div>
       </div>
     </Teleport>
+    <!-- Review Submission Modal -->
+    <ReviewModal
+      :is-open="isReviewModalOpen"
+      :application="reviewTargetApp"
+      @close="isReviewModalOpen = false"
+      @reviewed="onReviewSubmitted"
+    />
   </div>
 </template>
 
@@ -269,18 +302,38 @@ import {
   XCircle,
   Search,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Star,
+  Check
 } from 'lucide-vue-next'
 import { authState } from '../data/auth'
 import {
   getApplicationsByStudent,
   withdrawApplication
 } from '../data/applicationService'
+import { hasUserReviewed } from '../data/reviewService'
+import ReviewModal from '../components/ReviewModal.vue'
 
 const activeStatus = ref('all')
 const sortOrder = ref('newest')
 const selectedApp = ref(null)
 const appToWithdraw = ref(null)
+
+const isReviewModalOpen = ref(false)
+const reviewTargetApp = ref(null)
+
+const hasReviewedApp = (appId) => {
+  return hasUserReviewed(appId, studentId.value)
+}
+
+const openReviewModal = (app) => {
+  reviewTargetApp.value = app
+  isReviewModalOpen.value = true
+}
+
+const onReviewSubmitted = () => {
+  // review submitted
+}
 
 const studentId = computed(() => authState.currentUser?.id || 'student-akmal')
 

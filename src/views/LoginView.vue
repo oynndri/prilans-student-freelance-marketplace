@@ -11,10 +11,10 @@
         </span>
       </router-link>
       <h2 class="text-xl sm:text-2xl font-extrabold text-neutral-900 tracking-tight">
-        Welcome back to Prilans
+        Sign In to Prilans
       </h2>
       <p class="mt-1 text-xs text-neutral-500">
-        Log in to access your student proposals, dashboard, and freelance gigs
+        Enter your credentials to access your portal automatically
       </p>
     </div>
 
@@ -37,7 +37,7 @@
               <input
                 v-model="email"
                 type="email"
-                placeholder="student@university.edu"
+                placeholder="your.email@example.com"
                 required
                 class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition"
               />
@@ -94,13 +94,21 @@
           </div>
         </form>
 
-        <div class="mt-6 border-t border-neutral-100 pt-4 text-center">
-          <p class="text-xs text-neutral-500">
-            Don't have a student account yet?
+        <div class="mt-6 border-t border-neutral-100 pt-4 flex items-center justify-between text-xs text-neutral-500">
+          <p>
+            Don't have an account?
             <router-link to="/register" class="font-bold text-neutral-900 hover:underline ml-1">
-              Register now
+              Create account
             </router-link>
           </p>
+
+          <router-link
+            to="/admin/login"
+            class="text-[11px] font-semibold text-neutral-400 hover:text-red-600 transition flex items-center gap-1"
+          >
+            <ShieldAlert class="w-3.5 h-3.5" />
+            <span>Admin Portal</span>
+          </router-link>
         </div>
       </div>
     </div>
@@ -110,13 +118,14 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-vue-next'
+import { Mail, Lock, ArrowRight, AlertCircle, Loader2, ShieldAlert } from 'lucide-vue-next'
 import { loginUser } from '../data/auth'
 
 const router = useRouter()
-const email = ref('akmalnslrh@gmail.com')
-const password = ref('password123')
-const rememberMe = ref(true)
+// Default empty fields - no pre-filled credentials
+const email = ref('')
+const password = ref('')
+const rememberMe = ref(false)
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
@@ -129,13 +138,27 @@ const handleLogin = () => {
 
   isSubmitting.value = true
   setTimeout(() => {
-    loginUser(email.value, password.value)
+    // Automatically detect user and role from credentials
+    const result = loginUser(email.value.trim(), password.value)
     isSubmitting.value = false
-    router.push('/')
-  }, 500)
+
+    if (!result.success) {
+      errorMessage.value = result.message || 'Login failed. Please check your credentials.'
+      return
+    }
+
+    // Role-based automatic redirect:
+    if (result.role === 'admin') {
+      router.push('/admin/dashboard')
+    } else if (result.role === 'client') {
+      router.push('/client/dashboard')
+    } else {
+      router.push('/student/dashboard')
+    }
+  }, 400)
 }
 
 const handleForgotPassword = () => {
-  alert('Password reset link will be sent to your registered university email.')
+  alert('Password reset instructions have been dispatched to your email address.')
 }
 </script>

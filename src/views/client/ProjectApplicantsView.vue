@@ -88,12 +88,56 @@
           </div>
 
           <!-- Client Action Controls -->
-          <div class="flex items-center justify-between pt-2 border-t border-neutral-100">
-            <span class="text-xs text-neutral-400">
-              Decision: <strong class="text-neutral-800">{{ app.status }}</strong>
-            </span>
-
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-neutral-100">
             <div class="flex items-center gap-2">
+              <span class="text-xs text-neutral-400">
+                Application: <strong class="text-neutral-800">{{ app.status }}</strong>
+              </span>
+
+              <!-- Work Completion Tag if Accepted -->
+              <span
+                v-if="app.status === 'Accepted'"
+                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                :class="app.workStatus === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-blue-50 text-blue-700 border border-blue-200'"
+              >
+                Work: {{ app.workStatus || 'In Progress' }}
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- If Accepted, allow Work Status management and Reviewing -->
+              <template v-if="app.status === 'Accepted'">
+                <!-- Mark as Completed button if currently In Progress -->
+                <button
+                  v-if="app.workStatus !== 'Completed'"
+                  @click="handleMarkCompleted(app)"
+                  class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+                >
+                  <CheckCircle2 class="w-3.5 h-3.5" />
+                  <span>Mark Work Completed</span>
+                </button>
+
+                <!-- Leave Review button if Completed -->
+                <template v-if="app.workStatus === 'Completed'">
+                  <button
+                    v-if="!hasReviewedApp(app.id)"
+                    @click="openReviewModal(app)"
+                    class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer shadow-2xs flex items-center gap-1.5"
+                  >
+                    <Star class="w-3.5 h-3.5 fill-white" />
+                    <span>Leave Review</span>
+                  </button>
+                  <span
+                    v-else
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-semibold"
+                  >
+                    <Check class="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Review Submitted</span>
+                  </span>
+                </template>
+              </template>
+
+              <!-- Standard Status Actions -->
               <button
                 v-if="app.status !== 'Accepted'"
                 @click="promptDecision(app, 'Accepted')"
@@ -167,6 +211,13 @@
         </div>
       </div>
     </Teleport>
+    <!-- Review Submission Modal -->
+    <ReviewModal
+      :is-open="isReviewModalOpen"
+      :application="reviewTargetApp"
+      @close="isReviewModalOpen = false"
+      @reviewed="onReviewSubmitted"
+    />
   </div>
 </template>
 
@@ -176,18 +227,25 @@ import { useRoute } from 'vue-router'
 import {
   ArrowLeft,
   Check,
+  CheckCircle2,
   Users,
-  AlertCircle
+  AlertCircle,
+  Star
 } from 'lucide-vue-next'
 import { getProjectById } from '../../data/projectService'
 import {
   getApplicationsByProject,
-  updateApplicationStatus
+  updateApplicationStatus,
+  updateWorkStatus
 } from '../../data/applicationService'
+import { hasUserReviewed } from '../../data/reviewService'
+import { authState } from '../../data/auth'
+import ReviewModal from '../../components/ReviewModal.vue'
 
 const route = useRoute()
 const projectId = route.params.id
 
+const currentUser = computed(() => authState.currentUser)
 const project = computed(() => getProjectById(projectId))
 
 const projectApplications = computed(() => {
@@ -196,6 +254,26 @@ const projectApplications = computed(() => {
 
 const actionCandidate = ref(null)
 const targetStatus = ref('Accepted')
+
+const isReviewModalOpen = ref(false)
+const reviewTargetApp = ref(null)
+
+const hasReviewedApp = (appId) => {
+  return hasUserReviewed(appId, currentUser.value?.id)
+}
+
+const handleMarkCompleted = (app) => {
+  updateWorkStatus(app.id, 'Completed')
+}
+
+const openReviewModal = (app) => {
+  reviewTargetApp.value = app
+  isReviewModalOpen.value = true
+}
+
+const onReviewSubmitted = () => {
+  // review submitted successfully
+}
 
 const promptDecision = (app, status) => {
   actionCandidate.value = app
