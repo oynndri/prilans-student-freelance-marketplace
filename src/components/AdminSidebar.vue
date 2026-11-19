@@ -118,14 +118,14 @@ import {
   ShieldAlert,
   ExternalLink
 } from 'lucide-vue-next'
-import { authState, logoutUser } from '../data/auth'
+import { authState, logoutUser, defaultAdminProfile } from '../data/auth'
 import { projectState } from '../data/projectService'
 import { applicationState } from '../data/applicationService'
 
 const route = useRoute()
 const router = useRouter()
 
-const adminUser = computed(() => authState.currentUser)
+const adminUser = computed(() => authState.currentUser || defaultAdminProfile)
 
 const totalProjects = computed(() => projectState.projects.length)
 const totalApps = computed(() => applicationState.applications.length)

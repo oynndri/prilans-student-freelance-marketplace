@@ -129,13 +129,13 @@ import {
   PlusCircle,
   FileText
 } from 'lucide-vue-next'
-import { authState, isClient, logoutUser } from '../data/auth'
+import { authState, isClient, logoutUser, defaultStudentProfile } from '../data/auth'
 
 const router = useRouter()
 const isOpen = ref(false)
 const dropdownRef = ref(null)
 
-const user = computed(() => authState.currentUser)
+const user = computed(() => authState.currentUser || defaultStudentProfile)
 
 const handleLogout = () => {
   logoutUser()

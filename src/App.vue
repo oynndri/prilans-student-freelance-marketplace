@@ -4,22 +4,22 @@
 
     <!-- Unauthenticated Public & Auth Pages (No persistent sidebar wrapper) -->
     <template v-if="isAuthOrPublicRoute">
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </template>
 
     <!-- Admin Portal Dedicated Layout -->
     <AdminLayout v-else-if="isAdminRoute">
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </AdminLayout>
 
     <!-- Client Portal Dedicated Layout -->
     <ClientLayout v-else-if="isClientRoute">
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </ClientLayout>
 
     <!-- Student Portal Dedicated Layout -->
     <StudentLayout v-else>
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </StudentLayout>
   </div>
 </template>
