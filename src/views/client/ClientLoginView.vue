@@ -120,9 +120,9 @@ import { Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-vue-next'
 import { loginUser } from '../../data/auth'
 
 const router = useRouter()
-const email = ref('sarah.jenkins@novadigital.io')
-const password = ref('password123')
-const rememberMe = ref(true)
+const email = ref('')
+const password = ref('')
+const rememberMe = ref(false)
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 

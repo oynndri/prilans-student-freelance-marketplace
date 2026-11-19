@@ -72,7 +72,7 @@ export const defaultAdminProfile = {
 
 function loadInitialUser() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-    return defaultStudentProfile
+    return null
   }
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -84,12 +84,12 @@ function loadInitialUser() {
   } catch (e) {
     console.error('Failed to load user from localStorage:', e)
   }
-  return defaultStudentProfile
+  return null
 }
 
 function loadInitialSession() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-    return true
+    return false
   }
   try {
     const session = localStorage.getItem(SESSION_KEY)
@@ -99,7 +99,7 @@ function loadInitialSession() {
   } catch (e) {
     console.error(e)
   }
-  return true
+  return false
 }
 
 export const authState = reactive({
@@ -353,8 +353,10 @@ export function loginUser(email, password, forcedRole = null) {
 // Logout user
 export function logoutUser() {
   authState.isAuthenticated = false
+  authState.currentUser = null
   try {
-    localStorage.setItem(SESSION_KEY, 'false')
+    localStorage.removeItem(SESSION_KEY)
+    localStorage.removeItem(STORAGE_KEY)
   } catch (e) {}
 }
 

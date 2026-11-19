@@ -34,16 +34,16 @@ import AdminProjectsView from '../views/admin/AdminProjectsView.vue'
 import AdminApplicationsView from '../views/admin/AdminApplicationsView.vue'
 
 const routes = [
-  // 1. Student Portal Routes
+  // 1. Root / Entry Route: If logged in, go to respective dashboard; else go to /login
   {
     path: '/',
     redirect: () => {
-      if (authState.isAuthenticated) {
-        if (authState.currentUser?.role === 'admin') return '/admin/dashboard'
-        if (authState.currentUser?.role === 'client') return '/client/dashboard'
+      if (authState.isAuthenticated && authState.currentUser) {
+        if (authState.currentUser.role === 'admin') return '/admin/dashboard'
+        if (authState.currentUser.role === 'client') return '/client/dashboard'
         return '/student/dashboard'
       }
-      return '/student/projects'
+      return '/login'
     }
   },
   {

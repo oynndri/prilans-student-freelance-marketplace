@@ -21,17 +21,6 @@
           <span>{{ errorMessage }}</span>
         </div>
 
-        <!-- Quick Demo Credentials Box -->
-        <div class="mb-5 p-3.5 bg-white/5 border border-white/10 rounded-xl space-y-1">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
-            Demo Admin Credentials
-          </span>
-          <div class="text-xs text-neutral-300 font-mono flex justify-between">
-            <span>Email: admin@prilans.demo</span>
-            <span>Pass: admin123</span>
-          </div>
-        </div>
-
         <form @submit.prevent="handleAdminLogin" class="space-y-4">
           <!-- Email Input -->
           <div>
@@ -43,7 +32,7 @@
               <input
                 v-model="email"
                 type="email"
-                placeholder="admin@prilans.demo"
+                placeholder="Enter admin email address"
                 required
                 class="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-neutral-800/80 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
               />
@@ -60,7 +49,7 @@
               <input
                 v-model="password"
                 type="password"
-                placeholder="admin123"
+                placeholder="Enter admin password"
                 required
                 class="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl bg-neutral-800/80 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
               />
@@ -85,8 +74,8 @@
           <router-link to="/" class="hover:text-white transition">
             ← Return to Marketplace
           </router-link>
-          <router-link to="/client/login" class="hover:text-white transition">
-            Client Portal →
+          <router-link to="/login" class="hover:text-white transition">
+            Standard Login →
           </router-link>
         </div>
       </div>
@@ -108,8 +97,8 @@ import {
 import { loginUser } from '../../data/auth'
 
 const router = useRouter()
-const email = ref('admin@prilans.demo')
-const password = ref('admin123')
+const email = ref('')
+const password = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
@@ -117,7 +106,7 @@ const handleAdminLogin = () => {
   errorMessage.value = ''
 
   if (email.value.trim().toLowerCase() !== 'admin@prilans.demo' || password.value !== 'admin123') {
-    errorMessage.value = 'Invalid admin credentials. Use admin@prilans.demo and admin123.'
+    errorMessage.value = 'Invalid admin email or password. Please verify your credentials and try again.'
     return
   }
 
