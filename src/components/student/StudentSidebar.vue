@@ -1,19 +1,19 @@
 <template>
   <aside
-    class="w-[260px] shrink-0 glass-sidebar flex flex-col justify-between py-6 px-4 select-none h-full overflow-y-auto"
+    class="w-[260px] shrink-0 bg-[#f8fafc] border-r border-[#e2e8f0] flex flex-col justify-between py-6 px-4 select-none h-full overflow-y-auto"
   >
     <!-- Top Branding & Navigation -->
     <div class="space-y-6">
       <!-- Brand Logo -->
       <router-link to="/student/dashboard" class="flex items-center gap-2.5 px-2 group">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+        <div class="w-8 h-8 rounded-xl bg-[#0f172a] text-white flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
           <span>P</span>
         </div>
         <div>
-          <span class="text-[19px] font-extrabold tracking-tight text-white block leading-tight">
-            Prilans<span class="text-emerald-400">.</span>
+          <span class="text-[19px] font-extrabold tracking-tight text-neutral-900 block leading-tight">
+            Prilans<span class="text-[#22c55e]">.</span>
           </span>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+          <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">
             Student Portal
           </span>
         </div>
@@ -26,7 +26,7 @@
 
       <!-- Navigation Section: MENU -->
       <div>
-        <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase px-2 mb-2">
+        <div class="text-[10px] font-bold tracking-wider text-neutral-400 uppercase px-2 mb-2">
           MENU
         </div>
         <nav class="space-y-1" aria-label="Student Navigation">
@@ -37,15 +37,15 @@
             class="flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all"
             :class="[
               isRouteActive(item.path)
-                ? 'bg-white/10 text-white shadow-xs border border-white/10 font-semibold'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-white text-neutral-900 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-neutral-200/90 font-semibold'
+                : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/50'
             ]"
           >
             <div class="flex items-center gap-3">
               <component
                 :is="item.icon"
                 class="w-4 h-4 shrink-0"
-                :class="isRouteActive(item.path) ? 'text-emerald-400 stroke-[2.2]' : 'text-slate-400 stroke-[1.8]'"
+                :class="isRouteActive(item.path) ? 'text-neutral-900 stroke-[2.2]' : 'text-neutral-400 stroke-[1.8]'"
               />
               <span>{{ item.label }}</span>
             </div>
@@ -53,7 +53,7 @@
             <!-- Unread badge on notifications -->
             <span
               v-if="item.path === '/notifications' && unreadNotifs > 0"
-              class="px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold"
+              class="px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold"
             >
               {{ unreadNotifs }}
             </span>
@@ -63,23 +63,23 @@
 
       <!-- PREFERENCES -->
       <div>
-        <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase px-2 mb-2">
+        <div class="text-[10px] font-bold tracking-wider text-neutral-400 uppercase px-2 mb-2">
           PREFERENCES
         </div>
         <nav class="space-y-1">
           <button
             type="button"
-            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer"
+            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/50 transition cursor-pointer"
           >
-            <Settings class="w-4 h-4 text-slate-400 stroke-[1.8]" />
+            <Settings class="w-4 h-4 text-neutral-400 stroke-[1.8]" />
             <span>Settings</span>
           </button>
           <button
             type="button"
             @click="handleLogout"
-            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-red-400 hover:bg-red-500/10 transition cursor-pointer"
+            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-red-600 hover:bg-red-50 transition cursor-pointer"
           >
-            <LogOut class="w-4 h-4 text-red-400 stroke-[1.8]" />
+            <LogOut class="w-4 h-4 text-red-500 stroke-[1.8]" />
             <span>Sign Out</span>
           </button>
         </nav>
