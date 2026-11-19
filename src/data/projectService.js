@@ -33,9 +33,13 @@ function persistProjects() {
   }
 }
 
-// Student-facing available projects (only 'Open' projects, plus initial mock projects without explicit non-open status)
+// Student-facing available projects (only 'Open' projects, plus initial mock projects without explicit non-open status, AND not hidden/moderated by Admin)
 export const studentAvailableProjects = computed(() => {
   return projectState.projects.filter(p => {
+    // If moderated or hidden by Admin, hide from student marketplace
+    if (p.isModerated || p.isHiddenByAdmin) {
+      return false
+    }
     // If it has status property, it must be 'Open'
     if (p.status) {
       return p.status === 'Open'
@@ -58,7 +62,7 @@ export function createProject(projectData, clientId, isDraft = false) {
 
   const newProj = {
     id: Date.now(),
-    clientId: clientId || 'client-demo',
+    clientId: clientId || 'client-techcorp',
     title: projectData.title,
     description: projectData.description,
     category: projectData.category || 'Web Development',
@@ -75,6 +79,8 @@ export function createProject(projectData, clientId, isDraft = false) {
     positions: Number(projectData.positions) || 1,
     additionalRequirements: projectData.additionalRequirements || '',
     status: isDraft ? 'Draft' : 'Open', // 'Draft', 'Open', 'Paused', 'Closed'
+    isModerated: false,
+    isHiddenByAdmin: false,
     postedTime: 'Just now',
     postedMinutesAgo: 0,
     verified: true,
@@ -91,9 +97,9 @@ export function createProject(projectData, clientId, isDraft = false) {
   return newProj
 }
 
-// Update / Edit Project (Client)
+// Update / Edit Project (Client or Admin moderation)
 export function updateProject(id, updatedFields) {
-  const index = projectState.projects.findIndex(p => p.id === id)
+  const index = projectState.projects.findIndex(p => String(p.id) === String(id))
   if (index !== -1) {
     const existing = projectState.projects[index]
     const merged = { ...existing, ...updatedFields, updatedAt: new Date().toISOString() }
@@ -117,9 +123,21 @@ export function updateProject(id, updatedFields) {
   return null
 }
 
-// Delete Project (Client)
+// Admin project moderation: Hide / Show
+export function toggleProjectModeration(id) {
+  const p = projectState.projects.find(item => String(item.id) === String(id))
+  if (p) {
+    p.isModerated = !p.isModerated
+    p.isHiddenByAdmin = p.isModerated
+    persistProjects()
+    return p
+  }
+  return null
+}
+
+// Delete Project (Client or Admin)
 export function deleteProject(id) {
-  projectState.projects = projectState.projects.filter(p => p.id !== id)
+  projectState.projects = projectState.projects.filter(p => String(p.id) !== String(id))
   persistProjects()
 }
 
