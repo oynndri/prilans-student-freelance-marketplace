@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { authState } from '../data/auth'
+
+// Student & Public Views
 import FindProjects from '../views/FindProjects.vue'
 import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProfileSetupView from '../views/ProfileSetupView.vue'
 import StudentProfileView from '../views/StudentProfileView.vue'
-
-// Phase 03 Public & Student Views
 import ProjectDetailsPublicView from '../views/ProjectDetailsPublicView.vue'
 import ApplyProjectView from '../views/ApplyProjectView.vue'
 import MyApplicationsView from '../views/MyApplicationsView.vue'
@@ -20,8 +21,16 @@ import ManageProjectsView from '../views/client/ManageProjectsView.vue'
 import ProjectDetailsView from '../views/client/ProjectDetailsView.vue'
 import ProjectApplicantsView from '../views/client/ProjectApplicantsView.vue'
 
+// Phase 04 Admin Views
+import AdminLoginView from '../views/admin/AdminLoginView.vue'
+import AdminDashboardView from '../views/admin/AdminDashboardView.vue'
+import AdminStudentsView from '../views/admin/AdminStudentsView.vue'
+import AdminClientsView from '../views/admin/AdminClientsView.vue'
+import AdminProjectsView from '../views/admin/AdminProjectsView.vue'
+import AdminApplicationsView from '../views/admin/AdminApplicationsView.vue'
+
 const routes = [
-  // Student & Public Marketplace Routes
+  // Public & Student Routes
   {
     path: '/',
     name: 'FindProjects',
@@ -108,12 +117,61 @@ const routes = [
     path: '/client/projects/:id/applicants',
     name: 'ProjectApplicants',
     component: ProjectApplicantsView
+  },
+
+  // Phase 04 Admin Routes
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLoginView
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: AdminDashboardView,
+    meta: { requiresAdmin: true }
+  },
+  {
+    path: '/admin/students',
+    name: 'AdminStudents',
+    component: AdminStudentsView,
+    meta: { requiresAdmin: true }
+  },
+  {
+    path: '/admin/clients',
+    name: 'AdminClients',
+    component: AdminClientsView,
+    meta: { requiresAdmin: true }
+  },
+  {
+    path: '/admin/projects',
+    name: 'AdminProjects',
+    component: AdminProjectsView,
+    meta: { requiresAdmin: true }
+  },
+  {
+    path: '/admin/applications',
+    name: 'AdminApplications',
+    component: AdminApplicationsView,
+    meta: { requiresAdmin: true }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Route Guards: Protect Admin Routes
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAdmin) {
+    const isUserAdmin = authState.isAuthenticated && authState.currentUser?.role === 'admin'
+    if (!isUserAdmin) {
+      next('/admin/login')
+      return
+    }
+  }
+  next()
 })
 
 export default router

@@ -5,12 +5,15 @@
 
     <!-- Top Navigation Bar for Mobile and Tablet (<1024px) -->
     <header class="lg:hidden shrink-0 flex items-center justify-between px-4 py-3.5 bg-white border-b border-[#e2e8f0] shadow-xs z-30">
-      <router-link to="/" class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-[#0f172a] text-white flex items-center justify-center font-black text-sm">
+      <router-link :to="isAdmin ? '/admin/dashboard' : '/'" class="flex items-center gap-2.5">
+        <div
+          class="w-8 h-8 rounded-xl text-white flex items-center justify-center font-black text-sm"
+          :class="isAdmin ? 'bg-red-600' : 'bg-[#0f172a]'"
+        >
           <span>P</span>
         </div>
         <span class="text-lg font-extrabold tracking-tight text-neutral-900">
-          Prilans<span class="text-[#22c55e]">.</span>
+          Prilans<span :class="isAdmin ? 'text-red-500' : 'text-[#22c55e]'">.</span>
         </span>
       </router-link>
 
@@ -27,8 +30,13 @@
 
     <!-- Main Application Shell -->
     <div class="flex flex-1 min-h-0 w-full overflow-hidden">
-      <!-- Desktop Fixed/Sticky Sidebar (lg:block, width 260px) - Hidden on auth pages -->
-      <div v-if="!isAuthPage" class="hidden lg:block shrink-0 h-full">
+      <!-- Admin Sidebar (when on Admin pages and logged in as Admin) -->
+      <div v-if="isAdminRoute && !isAuthPage" class="hidden lg:block shrink-0 h-full">
+        <AdminSidebar />
+      </div>
+
+      <!-- Standard Student / Client Sidebar (when on non-admin routes) -->
+      <div v-else-if="!isAuthPage" class="hidden lg:block shrink-0 h-full">
         <AppSidebar
           :active-nav="activeNav"
           @select-nav="handleNavSelect"
@@ -71,7 +79,9 @@
 
             <!-- Drawer body -->
             <div class="flex-1 overflow-y-auto">
+              <AdminSidebar v-if="isAdminRoute" />
               <AppSidebar
+                v-else
                 :active-nav="activeNav"
                 @select-nav="handleNavSelect"
                 @upgrade="showUpgradeModal = true; isMobileMenuOpen = false"
@@ -87,30 +97,8 @@
         :class="isAuthPage ? 'p-0' : 'bg-[#f1f4f9] p-4 sm:p-6 md:p-8 xl:p-10'"
       >
         <div :class="isAuthPage ? 'w-full' : 'max-w-[1600px] mx-auto w-full'">
-          <!-- Secondary Nav Placeholders when on home route but non-find-project active -->
-          <div
-            v-if="!isAuthPage && route.path === '/' && activeNav !== 'find-project'"
-            class="bg-white rounded-2xl p-8 sm:p-12 border border-neutral-200/90 shadow-xs text-center py-20 max-w-2xl mx-auto my-8"
-          >
-            <div class="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-4 text-neutral-700">
-              <Component :is="currentNavIcon" class="w-7 h-7 stroke-[1.8]" />
-            </div>
-            <h2 class="text-xl sm:text-2xl font-bold text-neutral-900 capitalize mb-2">
-              {{ currentNavTitle }}
-            </h2>
-            <p class="text-sm text-neutral-500 leading-relaxed max-w-md mx-auto mb-6">
-              This section is configured for student freelancers and clients. Switch back to Find Projects to browse opportunities.
-            </p>
-            <button
-              @click="activeNav = 'find-project'"
-              class="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition cursor-pointer shadow-xs active:scale-[0.98]"
-            >
-              Back to Find Projects
-            </button>
-          </div>
-
           <!-- Dynamic Route View -->
-          <router-view v-else />
+          <router-view />
         </div>
       </main>
     </div>
@@ -176,18 +164,12 @@ import { useRoute } from 'vue-router'
 import {
   Menu,
   X,
-  Search,
-  UserCheck,
-  Building2,
-  FileText,
-  Mail,
-  Bell,
-  Settings,
-  HelpCircle,
   Rocket
 } from 'lucide-vue-next'
 import AppLoadingScreen from './components/AppLoadingScreen.vue'
 import AppSidebar from './components/AppSidebar.vue'
+import AdminSidebar from './components/AdminSidebar.vue'
+import { isAdmin } from './data/auth'
 
 const route = useRoute()
 const isLoading = ref(true)
@@ -196,7 +178,11 @@ const isMobileMenuOpen = ref(false)
 const showUpgradeModal = ref(false)
 
 const isAuthPage = computed(() => {
-  return ['/register', '/login'].includes(route.path)
+  return ['/register', '/login', '/client/register', '/client/login', '/admin/login'].includes(route.path)
+})
+
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin')
 })
 
 onMounted(() => {
@@ -209,18 +195,4 @@ const handleNavSelect = (id) => {
   activeNav.value = id
   isMobileMenuOpen.value = false
 }
-
-const navMeta = {
-  'find-project': { title: 'Find Project', icon: Search },
-  'student-profile': { title: 'My Skill Profile', icon: UserCheck },
-  'companies': { title: 'Companies', icon: Building2 },
-  'my-proposal': { title: 'My Proposal', icon: FileText },
-  'message': { title: 'Message', icon: Mail },
-  'notification': { title: 'Notification', icon: Bell },
-  'settings': { title: 'Settings', icon: Settings },
-  'help': { title: 'Help & Support', icon: HelpCircle }
-}
-
-const currentNavTitle = computed(() => navMeta[activeNav.value]?.title || 'Section')
-const currentNavIcon = computed(() => navMeta[activeNav.value]?.icon || Search)
 </script>
