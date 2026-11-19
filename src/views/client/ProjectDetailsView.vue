@@ -13,6 +13,15 @@
       <div class="flex items-center gap-2">
         <router-link
           v-if="project"
+          :to="`/client/projects/${project.id}/recommended-students`"
+          class="px-3.5 py-2 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-bold transition flex items-center gap-1.5"
+        >
+          <Sparkles class="w-3.5 h-3.5 text-indigo-600" />
+          <span>Find Matching Students</span>
+        </router-link>
+
+        <router-link
+          v-if="project"
           :to="`/client/projects/${project.id}/edit`"
           class="px-4 py-2 rounded-xl bg-neutral-900 text-white text-xs font-semibold hover:bg-black transition shadow-xs"
         >
@@ -129,7 +138,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft, MapPin } from 'lucide-vue-next'
+import { ArrowLeft, MapPin, Sparkles } from 'lucide-vue-next'
 import { getProjectById } from '../../data/projectService'
 
 const route = useRoute()

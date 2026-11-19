@@ -84,6 +84,46 @@
           </div>
         </div>
 
+        <!-- Student Rating & Reviews Metric Card -->
+        <div class="bg-white rounded-2xl p-5 border border-neutral-200/90 shadow-2xs space-y-3">
+          <div class="flex items-center justify-between border-b border-neutral-100 pb-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500">Reputation & Reviews</h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Verified Feedbacks
+            </span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="text-center p-3 bg-neutral-50 rounded-xl border border-neutral-100 shrink-0">
+              <span class="text-2xl font-black text-neutral-900 block leading-tight">
+                {{ studentRatingStats.formattedRating }}
+              </span>
+              <div class="flex justify-center mt-1">
+                <StarRating :model-value="studentRatingStats.averageRating" :readonly="true" size="sm" />
+              </div>
+              <span class="text-[10px] text-neutral-400 block mt-1">
+                {{ studentRatingStats.totalReviews }} {{ studentRatingStats.totalReviews === 1 ? 'review' : 'reviews' }}
+              </span>
+            </div>
+
+            <!-- Star distribution preview -->
+            <div class="flex-1 space-y-1 text-[11px] text-neutral-500">
+              <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="flex items-center gap-2">
+                <span class="w-2.5 text-right font-medium text-[10px]">{{ star }}★</span>
+                <div class="flex-1 bg-neutral-100 h-1.5 rounded-full overflow-hidden">
+                  <div
+                    class="bg-amber-400 h-full rounded-full"
+                    :style="{ width: `${studentRatingStats.totalReviews ? (studentRatingStats.starsBreakdown[star] / studentRatingStats.totalReviews) * 100 : 0}%` }"
+                  ></div>
+                </div>
+                <span class="w-3 text-right text-[10px] text-neutral-400">
+                  {{ studentRatingStats.starsBreakdown[star] }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Experience Level Card -->
         <div class="bg-white rounded-2xl p-5 border border-neutral-200/90 shadow-2xs space-y-4">
           <div class="flex items-center justify-between border-b border-neutral-100 pb-2.5">
@@ -291,6 +331,76 @@
             No portfolio projects added yet. Click "+ Add Project" to build your portfolio.
           </div>
         </div>
+
+        <!-- Reviews & Feedback History Section -->
+        <div class="bg-white rounded-2xl p-6 border border-neutral-200/90 shadow-2xs space-y-4">
+          <div class="flex items-center justify-between border-b border-neutral-100 pb-3">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500">
+                Client Reviews & Endorsements
+              </h3>
+              <p class="text-[11px] text-neutral-400 mt-0.5">
+                Feedback left by verified clients upon project completion.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-extrabold text-neutral-800">
+                {{ studentRatingStats.formattedRating }} / 5.0
+              </span>
+              <StarRating :model-value="studentRatingStats.averageRating" :readonly="true" size="sm" />
+            </div>
+          </div>
+
+          <!-- Reviews List -->
+          <div v-if="studentReviews.length > 0" class="divide-y divide-neutral-100">
+            <div
+              v-for="rev in studentReviews"
+              :key="rev.id"
+              class="py-4 first:pt-1 last:pb-1 space-y-2.5 text-xs"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full overflow-hidden bg-neutral-100 border border-neutral-200 shrink-0">
+                    <img
+                      :src="rev.reviewerAvatar || 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=160&q=80'"
+                      :alt="rev.reviewerName"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <span class="font-bold text-neutral-900 block leading-tight">{{ rev.reviewerName }}</span>
+                    <span class="text-[10px] text-neutral-400">
+                      Project: <strong class="text-neutral-600">{{ rev.projectTitle }}</strong>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <StarRating :model-value="rev.rating" :readonly="true" size="sm" />
+                  <span class="text-[10px] text-neutral-400 block mt-0.5">{{ formatDate(rev.createdAt) }}</span>
+                </div>
+              </div>
+
+              <!-- Comment body -->
+              <p class="text-neutral-700 leading-relaxed bg-[#f8fafc] p-3 rounded-xl border border-neutral-100">
+                "{{ rev.comment }}"
+              </p>
+
+              <!-- Category pills breakdown if available -->
+              <div v-if="rev.ratingsBreakdown && Object.keys(rev.ratingsBreakdown).length" class="flex flex-wrap gap-2 text-[10px] text-neutral-500 pt-0.5">
+                <span v-for="(val, cat) in rev.ratingsBreakdown" :key="cat" class="px-2 py-0.5 rounded bg-neutral-100 font-medium">
+                  {{ cat }}: {{ val }}★
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty Reviews State -->
+          <div v-else class="p-8 text-center border border-dashed border-neutral-200 rounded-xl text-neutral-400 text-xs space-y-1">
+            <p>No client reviews received yet.</p>
+            <p class="text-[11px] text-neutral-400">Complete accepted project milestones to earn client reviews.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -308,8 +418,30 @@ import {
   saveCurrentUser,
   profileCompletionPercentage
 } from '../data/auth'
+import {
+  getReviewsForStudent,
+  calculateRatingMetrics
+} from '../data/reviewService'
+import StarRating from '../components/StarRating.vue'
 
 const user = computed(() => authState.currentUser)
+
+const studentReviews = computed(() => {
+  return getReviewsForStudent(user.value?.id || 'student-akmal')
+})
+
+const studentRatingStats = computed(() => {
+  return calculateRatingMetrics(studentReviews.value)
+})
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'Recently'
+  try {
+    return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+  } catch (e) {
+    return 'Recently'
+  }
+}
 
 const isEditingBio = ref(false)
 const isEditingExp = ref(false)

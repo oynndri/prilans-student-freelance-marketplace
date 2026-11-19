@@ -110,20 +110,20 @@ import ProjectGrid from '../components/ProjectGrid.vue'
 import { filterOptions } from '../data/filters'
 import { studentAvailableProjects, mockCategories } from '../data/projectService'
 
-// Filter states matching the screenshot initial state
-const searchQuery = ref('Web Design')
+// Clean initial filter states (default empty, no pre-filled text or pre-checked filters)
+const searchQuery = ref('')
 const locationQuery = ref('')
 const selectedCategory = ref('All Categories')
-const selectedExperience = ref(['any']) // 'any' is checked in screenshot
-const projectType = ref('Hourly') // 'Hourly' selected in segmented control
-const selectedBudgets = ref([]) // empty initially
-const selectedProposals = ref(['10to15']) // 10 to 15 is checked in reference screenshot!
+const selectedExperience = ref([])
+const projectType = ref('All')
+const selectedBudgets = ref([])
+const selectedProposals = ref([])
 const sortBy = ref('newest')
 const viewMode = ref('grid')
 const showMobileFilters = ref(false)
 
 // Applied projects tracking
-const appliedProjectIds = ref([3])
+const appliedProjectIds = ref([])
 
 const handleApply = (id) => {
   if (!appliedProjectIds.value.includes(id)) {
@@ -139,8 +139,8 @@ const resetAllFilters = () => {
   searchQuery.value = ''
   locationQuery.value = ''
   selectedCategory.value = 'All Categories'
-  selectedExperience.value = ['any']
-  projectType.value = 'Hourly'
+  selectedExperience.value = []
+  projectType.value = 'All'
   selectedBudgets.value = []
   selectedProposals.value = []
   sortBy.value = 'newest'
@@ -228,7 +228,7 @@ const filteredAndSortedProjects = computed(() => {
   }
 
   // 5. Project Type (Hourly vs Fixed Price)
-  if (projectType.value) {
+  if (projectType.value && projectType.value !== 'All') {
     result = result.filter(p => p.projectType === projectType.value)
   }
 

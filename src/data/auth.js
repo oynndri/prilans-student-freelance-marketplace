@@ -16,7 +16,7 @@ export const defaultStudentProfile = {
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
   experienceLevel: 'Intermediate',
   experienceDescription: '2+ years building frontend web interfaces, contributing to academic projects and freelance clients.',
-  status: 'active', // 'active' | 'suspended'
+  status: 'active',
   createdAt: new Date(Date.now() - 3600000 * 48).toISOString(),
   skills: [
     'Frontend Development',
@@ -55,7 +55,7 @@ export const defaultClientProfile = {
   location: 'San Francisco, CA',
   avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&q=80',
   bio: 'Founder & Product Lead at Nova Digital Labs. We connect with talented university students for frontend, full-stack, and design projects.',
-  status: 'active', // 'active' | 'suspended'
+  status: 'active',
   createdAt: new Date(Date.now() - 3600000 * 72).toISOString()
 }
 
@@ -66,7 +66,8 @@ export const defaultAdminProfile = {
   email: 'admin@prilans.demo',
   avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&q=80',
   bio: 'Platform Moderator and Governance Administrator for Prilans Student Marketplace.',
-  status: 'active'
+  status: 'active',
+  createdAt: new Date(Date.now() - 3600000 * 120).toISOString()
 }
 
 function loadInitialUser() {
@@ -133,7 +134,7 @@ export function saveCurrentUser(updatedUser) {
   }
 }
 
-// Seed initial registered users if empty so Admin can immediately view seed accounts
+// Seed initial registered users
 function initSeedUsers() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return
   try {
@@ -197,7 +198,6 @@ function initSeedUsers() {
 }
 initSeedUsers()
 
-// Get all registered users from localStorage
 export function getRegisteredUsers() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return []
   try {
@@ -209,7 +209,6 @@ export function getRegisteredUsers() {
   return [defaultStudentProfile, defaultClientProfile, defaultAdminProfile]
 }
 
-// Update a user record (for suspension / activation)
 export function updateUserRecord(userId, updates) {
   try {
     const list = getRegisteredUsers()
@@ -218,7 +217,6 @@ export function updateUserRecord(userId, updates) {
       list[index] = { ...list[index], ...updates }
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(list))
 
-      // If updating currently logged in user, update state as well
       if (authState.currentUser?.id === userId) {
         saveCurrentUser(updates)
       }
@@ -350,19 +348,6 @@ export function loginUser(email, password, forcedRole = null) {
   } catch (e) {}
   saveCurrentUser(userToLogin)
   return { success: true, role: userToLogin.role }
-}
-
-// Quick demo role switch helper (Student, Client, Admin)
-export function switchRole(role) {
-  if (role === 'admin') {
-    authState.currentUser = { ...defaultAdminProfile }
-  } else if (role === 'client') {
-    authState.currentUser = { ...defaultClientProfile }
-  } else {
-    authState.currentUser = { ...defaultStudentProfile }
-  }
-  authState.isAuthenticated = true
-  saveCurrentUser(authState.currentUser)
 }
 
 // Logout user
