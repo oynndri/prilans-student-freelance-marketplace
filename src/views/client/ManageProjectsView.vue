@@ -84,19 +84,35 @@
               <span>•</span>
               <span>{{ project.experienceLevel }}</span>
               <span>•</span>
-              <span>{{ project.country || 'Remote' }}</span>
-              <span>•</span>
               <span class="text-neutral-400">Created: {{ formatDate(project.createdAt) }}</span>
+              <span>•</span>
+              <!-- Direct Applicants Counter with Link -->
+              <router-link
+                :to="`/client/projects/${project.id}/applicants`"
+                class="font-semibold text-blue-600 hover:underline flex items-center gap-1"
+              >
+                <Users class="w-3.5 h-3.5" />
+                <span>{{ getApplicantsCount(project.id) }} Candidate(s)</span>
+              </router-link>
             </div>
           </div>
 
           <!-- Actions toolbar -->
           <div class="flex flex-wrap items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-neutral-100">
+            <!-- View Applicants Button -->
+            <router-link
+              :to="`/client/projects/${project.id}/applicants`"
+              class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition flex items-center gap-1"
+            >
+              <Users class="w-3.5 h-3.5" />
+              <span>Applicants</span>
+            </router-link>
+
             <router-link
               :to="`/client/projects/${project.id}`"
               class="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 transition"
             >
-              View
+              Details
             </router-link>
 
             <router-link
@@ -201,7 +217,8 @@ import {
   PlusCircle,
   Trash2,
   AlertTriangle,
-  FolderSearch
+  FolderSearch,
+  Users
 } from 'lucide-vue-next'
 import { authState } from '../../data/auth'
 import {
@@ -209,6 +226,7 @@ import {
   setProjectStatus,
   deleteProject
 } from '../../data/projectService'
+import { getApplicationsByProject } from '../../data/applicationService'
 
 const activeStatusFilter = ref('all')
 const projectToDelete = ref(null)
@@ -226,6 +244,10 @@ const statusTabs = [
 const clientProjects = computed(() => {
   return projectState.projects.filter(p => p.clientId === client.value.id || !p.clientId)
 })
+
+const getApplicantsCount = (projectId) => {
+  return getApplicationsByProject(projectId).length
+}
 
 const getCountForTab = (tabId) => {
   if (tabId === 'all') return clientProjects.value.length

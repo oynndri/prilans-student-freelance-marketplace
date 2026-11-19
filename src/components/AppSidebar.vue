@@ -35,19 +35,29 @@
             :key="item.id"
             @click="navigateItem(item)"
             type="button"
-            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all text-left cursor-pointer focus:outline-none focus:ring-2 focus:ring-neutral-400"
             :class="[
               isItemActive(item)
                 ? 'bg-white text-neutral-900 shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-neutral-200/90 font-semibold'
                 : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200/50'
             ]"
           >
-            <component
-              :is="item.icon"
-              class="w-4 h-4 shrink-0"
-              :class="isItemActive(item) ? 'text-neutral-900 stroke-[2.2]' : 'text-neutral-400 stroke-[1.8]'"
-            />
-            <span>{{ item.label }}</span>
+            <div class="flex items-center gap-3">
+              <component
+                :is="item.icon"
+                class="w-4 h-4 shrink-0"
+                :class="isItemActive(item) ? 'text-neutral-900 stroke-[2.2]' : 'text-neutral-400 stroke-[1.8]'"
+              />
+              <span>{{ item.label }}</span>
+            </div>
+
+            <!-- Unread notification count badge -->
+            <span
+              v-if="item.id === 'notification' && unreadCount > 0"
+              class="px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold"
+            >
+              {{ unreadCount }}
+            </span>
           </button>
         </nav>
       </div>
@@ -107,7 +117,8 @@ import {
 } from 'lucide-vue-next'
 import UserProfileDropdown from './UserProfileDropdown.vue'
 import PlusPlanCard from './PlusPlanCard.vue'
-import { isClient } from '../data/auth'
+import { authState, isClient } from '../data/auth'
+import { getUnreadNotificationCount } from '../data/applicationService'
 
 const props = defineProps({
   activeNav: {
@@ -120,14 +131,17 @@ const emit = defineEmits(['select-nav', 'upgrade'])
 const router = useRouter()
 const route = useRoute()
 
+const userId = computed(() => authState.currentUser?.id || 'student-akmal')
+const unreadCount = computed(() => getUnreadNotificationCount(userId.value))
+
 // Student specific navigation
 const studentMenuItems = [
   { id: 'find-project', label: 'Find Project', icon: Search, route: '/' },
   { id: 'student-profile', label: 'My Skill Profile', icon: UserCheck, route: '/profile' },
+  { id: 'my-applications', label: 'My Applications', icon: FileText, route: '/my-applications' },
   { id: 'companies', label: 'Companies', icon: Building2 },
-  { id: 'my-proposal', label: 'My Proposal', icon: FileText },
   { id: 'message', label: 'Message', icon: Mail },
-  { id: 'notification', label: 'Notification', icon: Bell }
+  { id: 'notification', label: 'Notification', icon: Bell, route: '/notifications' }
 ]
 
 // Client specific navigation
@@ -137,7 +151,7 @@ const clientMenuItems = [
   { id: 'my-projects', label: 'My Projects', icon: Briefcase, route: '/client/projects' },
   { id: 'find-freelancers', label: 'Find Freelancers', icon: Users, route: '/' },
   { id: 'message', label: 'Message', icon: Mail },
-  { id: 'notification', label: 'Notification', icon: Bell }
+  { id: 'notification', label: 'Notification', icon: Bell, route: '/notifications' }
 ]
 
 const activeMenuItems = computed(() => {
@@ -153,6 +167,7 @@ const isItemActive = (item) => {
   if (item.route && route.path === item.route) return true
   if (route.path === '/' && item.id === 'find-project' && !isClient.value) return true
   if (route.path.startsWith('/client/projects') && item.id === 'my-projects') return true
+  if (route.path === '/my-applications' && item.id === 'my-applications') return true
   return props.activeNav === item.id
 }
 

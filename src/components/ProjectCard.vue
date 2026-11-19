@@ -9,7 +9,7 @@
           {{ project.experienceLevel }}
         </span>
         <div class="flex items-center gap-2">
-          <span>{{ project.postedTime }}</span>
+          <span>{{ project.postedTime || 'Recently' }}</span>
           <div class="relative" ref="cardMenuRef">
             <button
               type="button"
@@ -24,26 +24,25 @@
               v-if="isMenuOpen"
               class="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-30 min-w-[130px] text-[12px]"
             >
+              <router-link
+                :to="`/projects/${project.id}`"
+                class="block w-full text-left px-3 py-1.5 hover:bg-neutral-50 text-neutral-700"
+              >
+                View Full Details
+              </router-link>
               <button
                 @click="isMenuOpen = false"
                 type="button"
-                class="w-full text-left px-3 py-1.5 hover:bg-neutral-50 text-neutral-700"
+                class="w-full text-left px-3 py-1.5 hover:bg-neutral-50 text-neutral-700 cursor-pointer"
               >
                 Save Project
               </button>
               <button
                 @click="isMenuOpen = false"
                 type="button"
-                class="w-full text-left px-3 py-1.5 hover:bg-neutral-50 text-neutral-700"
+                class="w-full text-left px-3 py-1.5 hover:bg-neutral-50 text-neutral-500 cursor-pointer"
               >
                 Share Link
-              </button>
-              <button
-                @click="isMenuOpen = false"
-                type="button"
-                class="w-full text-left px-3 py-1.5 hover:bg-neutral-50 text-neutral-500"
-              >
-                Not Interested
               </button>
             </div>
           </div>
@@ -52,7 +51,9 @@
 
       <!-- Project Title -->
       <h3 class="text-[15px] font-bold text-neutral-900 tracking-tight leading-snug mb-2 group-hover:text-neutral-950">
-        {{ project.title }}
+        <router-link :to="`/projects/${project.id}`" class="hover:underline">
+          {{ project.title }}
+        </router-link>
       </h3>
 
       <!-- Badges: Verified, Country, Hiring status -->
@@ -66,17 +67,17 @@
         <!-- Country with Pin -->
         <div class="flex items-center gap-1 text-neutral-600">
           <MapPin class="w-3.5 h-3.5 text-neutral-400" />
-          <span>{{ project.country }}</span>
+          <span>{{ project.country || project.location || 'Remote' }}</span>
         </div>
 
         <!-- Hiring Status indicator (Green for Still Selecting, Subtle orange for 1 hired) -->
         <div class="flex items-center gap-1">
           <span
-            v-if="project.hiringType === 'selecting'"
+            v-if="project.hiringType === 'selecting' || !project.hiringType"
             class="inline-flex items-center gap-1 text-[#16a34a] font-medium"
           >
             <span class="w-1.5 h-1.5 rounded-full bg-[#16a34a]"></span>
-            {{ project.hiringStatus }}
+            {{ project.hiringStatus || 'Still Selecting' }}
           </span>
           <span
             v-else
@@ -122,30 +123,41 @@
           <div class="w-5 h-5 rounded-full bg-[#f3e8ff] flex items-center justify-center shrink-0">
             <FileText class="w-3 h-3 text-[#7c3aed] stroke-[2]" />
           </div>
-          <span>{{ project.proposalCount }} proposals</span>
+          <span>{{ liveProposalsCount }} proposals</span>
         </div>
       </div>
 
       <!-- Action Button: Apply Now or Applied -->
       <button
+        v-if="!isClient"
         type="button"
-        @click="$emit('apply', project.id)"
-        :disabled="isApplied"
+        @click="handleApplyClick"
+        :disabled="hasApplied"
         class="px-4 py-2 rounded-xl text-[12px] font-semibold transition shrink-0 cursor-pointer active:scale-[0.98]"
         :class="[
-          isApplied
+          hasApplied
             ? 'bg-[#cbd5e1] text-white cursor-not-allowed'
             : 'bg-[#0f172a] text-white hover:bg-black shadow-xs'
         ]"
       >
-        {{ isApplied ? 'Applied' : 'Apply Now' }}
+        {{ hasApplied ? 'Applied' : 'Apply Now' }}
       </button>
+
+      <!-- Client Owner indicator -->
+      <router-link
+        v-else
+        :to="`/client/projects/${project.id}/applicants`"
+        class="px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition"
+      >
+        View Applicants
+      </router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   MoreVertical,
   CheckCircle2,
@@ -154,8 +166,10 @@ import {
   FileText,
   UserCheck
 } from 'lucide-vue-next'
+import { authState, isClient } from '../data/auth'
+import { hasStudentApplied, getApplicationsByProject } from '../data/applicationService'
 
-defineProps({
+const props = defineProps({
   project: {
     type: Object,
     required: true
@@ -166,10 +180,29 @@ defineProps({
   }
 })
 
-defineEmits(['apply'])
+const emit = defineEmits(['apply'])
+const router = useRouter()
 
 const isMenuOpen = ref(false)
 const cardMenuRef = ref(null)
+
+const studentId = computed(() => authState.currentUser?.id || 'student-akmal')
+
+const hasApplied = computed(() => {
+  return props.isApplied || hasStudentApplied(props.project.id, studentId.value)
+})
+
+const liveProposalsCount = computed(() => {
+  const realCount = getApplicationsByProject(props.project.id).length
+  return Math.max(props.project.proposalCount || 0, realCount)
+})
+
+const handleApplyClick = () => {
+  if (hasApplied.value) return
+  // Navigate directly to the Phase 03 dedicated application submission screen
+  router.push(`/projects/${props.project.id}/apply`)
+  emit('apply', props.project.id)
+}
 
 const handleClickOutside = (e) => {
   if (cardMenuRef.value && !cardMenuRef.value.contains(e.target)) {

@@ -5,6 +5,12 @@ import LoginView from '../views/LoginView.vue'
 import ProfileSetupView from '../views/ProfileSetupView.vue'
 import StudentProfileView from '../views/StudentProfileView.vue'
 
+// Phase 03 Public & Student Views
+import ProjectDetailsPublicView from '../views/ProjectDetailsPublicView.vue'
+import ApplyProjectView from '../views/ApplyProjectView.vue'
+import MyApplicationsView from '../views/MyApplicationsView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
+
 // Client Views
 import ClientRegisterView from '../views/client/ClientRegisterView.vue'
 import ClientLoginView from '../views/client/ClientLoginView.vue'
@@ -12,6 +18,7 @@ import ClientDashboardView from '../views/client/ClientDashboardView.vue'
 import PostProjectView from '../views/client/PostProjectView.vue'
 import ManageProjectsView from '../views/client/ManageProjectsView.vue'
 import ProjectDetailsView from '../views/client/ProjectDetailsView.vue'
+import ProjectApplicantsView from '../views/client/ProjectApplicantsView.vue'
 
 const routes = [
   // Student & Public Marketplace Routes
@@ -19,6 +26,26 @@ const routes = [
     path: '/',
     name: 'FindProjects',
     component: FindProjects
+  },
+  {
+    path: '/projects/:id',
+    name: 'ProjectDetailsPublic',
+    component: ProjectDetailsPublicView
+  },
+  {
+    path: '/projects/:id/apply',
+    name: 'ApplyProject',
+    component: ApplyProjectView
+  },
+  {
+    path: '/my-applications',
+    name: 'MyApplications',
+    component: MyApplicationsView
+  },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: NotificationsView
   },
   {
     path: '/register',
@@ -76,6 +103,11 @@ const routes = [
     path: '/client/projects/:id',
     name: 'ProjectDetails',
     component: ProjectDetailsView
+  },
+  {
+    path: '/client/projects/:id/applicants',
+    name: 'ProjectApplicants',
+    component: ProjectApplicantsView
   }
 ]
 
