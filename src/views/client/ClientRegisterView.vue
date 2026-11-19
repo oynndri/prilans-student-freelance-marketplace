@@ -192,7 +192,7 @@ import {
   AlertCircle,
   Loader2
 } from 'lucide-vue-next'
-import { registerClient } from '../data/auth'
+import { registerClient } from '../../data/auth'
 
 const router = useRouter()
 const isSubmitting = ref(false)

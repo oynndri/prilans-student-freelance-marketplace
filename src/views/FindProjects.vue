@@ -107,8 +107,8 @@ import SearchHeader from '../components/SearchHeader.vue'
 import FilterPanel from '../components/FilterPanel.vue'
 import ProjectResultsHeader from '../components/ProjectResultsHeader.vue'
 import ProjectGrid from '../components/ProjectGrid.vue'
-import { mockProjects, mockCategories } from '../data/projects'
 import { filterOptions } from '../data/filters'
+import { studentAvailableProjects, mockCategories } from '../data/projectService'
 
 // Filter states matching the screenshot initial state
 const searchQuery = ref('Web Design')
@@ -198,15 +198,15 @@ const totalSimulatedCount = computed(() => {
 
 // Filter and Sort Pipeline
 const filteredAndSortedProjects = computed(() => {
-  let result = [...mockProjects]
+  let result = [...studentAvailableProjects.value]
 
   // 1. Search Query (title, description, skills)
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase().trim()
     result = result.filter(p => {
-      const titleMatch = p.title.toLowerCase().includes(q)
-      const descMatch = p.description.toLowerCase().includes(q)
-      const skillMatch = p.skills.some(s => s.toLowerCase().includes(q))
+      const titleMatch = (p.title || '').toLowerCase().includes(q)
+      const descMatch = (p.description || '').toLowerCase().includes(q)
+      const skillMatch = (p.skills || []).some(s => s.toLowerCase().includes(q))
       return titleMatch || descMatch || skillMatch
     })
   }
@@ -214,7 +214,7 @@ const filteredAndSortedProjects = computed(() => {
   // 2. Location Query
   if (locationQuery.value.trim()) {
     const loc = locationQuery.value.toLowerCase().trim()
-    result = result.filter(p => p.country.toLowerCase().includes(loc))
+    result = result.filter(p => (p.country || p.location || '').toLowerCase().includes(loc))
   }
 
   // 3. Category Filter
@@ -238,7 +238,7 @@ const filteredAndSortedProjects = computed(() => {
       return selectedBudgets.value.some(bId => {
         const range = filterOptions.budgetRanges.find(r => r.id === bId)
         if (!range) return true
-        return p.price >= range.min && p.price <= range.max
+        return (p.price || 0) >= range.min && (p.price || 0) <= range.max
       })
     })
   }
@@ -249,20 +249,20 @@ const filteredAndSortedProjects = computed(() => {
       return selectedProposals.value.some(pId => {
         const range = filterOptions.proposalRanges.find(r => r.id === pId)
         if (!range) return true
-        return p.proposalCount >= range.min && p.proposalCount <= range.max
+        return (p.proposalCount || 0) >= range.min && (p.proposalCount || 0) <= range.max
       })
     })
   }
 
   // 8. Sorting
   if (sortBy.value === 'newest') {
-    result.sort((a, b) => a.postedMinutesAgo - b.postedMinutesAgo)
+    result.sort((a, b) => (a.postedMinutesAgo || 0) - (b.postedMinutesAgo || 0))
   } else if (sortBy.value === 'oldest') {
-    result.sort((a, b) => b.postedMinutesAgo - a.postedMinutesAgo)
+    result.sort((a, b) => (b.postedMinutesAgo || 0) - (a.postedMinutesAgo || 0))
   } else if (sortBy.value === 'lowest-budget') {
-    result.sort((a, b) => a.price - b.price)
+    result.sort((a, b) => (a.price || 0) - (b.price || 0))
   } else if (sortBy.value === 'highest-budget') {
-    result.sort((a, b) => b.price - a.price)
+    result.sort((a, b) => (b.price || 0) - (a.price || 0))
   }
 
   return result
